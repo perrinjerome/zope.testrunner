@@ -381,4 +381,10 @@ def test_suite():
         optionflags=optionflags,
         checker=checker))
 
+    suites.append(doctest.DocFileSuite(
+        'testrunner-setupmodule.rst',
+        setUp=setUp, tearDown=tearDown,
+        optionflags=optionflags,
+        checker=checker))
+
     return unittest.TestSuite(suites)

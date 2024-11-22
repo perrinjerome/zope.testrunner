@@ -477,7 +477,8 @@ def run_layer(options, layer_name, layer, tests, setup_layers,
     gathered = []
     gather_layers(layer, gathered)
     needed = {ly: 1 for ly in gathered}
-    if options.resume_number != 0:
+    if options.resume_number != 0 and options.verbose >= getattr(
+            layer, 'verbosity', 0):
         output.info("Running %s tests:" % layer_name)
     tear_down_unneeded(options, needed, setup_layers, errors)
 
@@ -817,23 +818,23 @@ def tear_down_unneeded(options, needed, setup_layers, errors, optional=False):
     unneeded.reverse()
     output = options.output
     for layer in unneeded:
-        output.start_tear_down(name_from_layer(layer))
-        t = time.time()
         try:
-            try:
-                if hasattr(layer, 'tearDown'):
+            if hasattr(layer, 'tearDown'):
+                output.start_tear_down(name_from_layer(layer))
+                t = time.time()
+                try:
                     layer.tearDown()
-            except NotImplementedError:
-                output.tear_down_not_supported()
-                if not optional:
-                    raise CanNotTearDown(layer)
-            except MemoryError:
-                raise
-            except Exception:
-                handle_layer_failure(
-                    TearDownLayerFailure(layer), output, errors)
-            else:
-                output.stop_tear_down(time.time() - t)
+                except NotImplementedError:
+                    output.tear_down_not_supported()
+                    if not optional:
+                        raise CanNotTearDown(layer)
+                except MemoryError:
+                    raise
+                except Exception:
+                    handle_layer_failure(
+                        TearDownLayerFailure(layer), output, errors)
+                else:
+                    output.stop_tear_down(time.time() - t)
         finally:
             del setup_layers[layer]
 
@@ -851,9 +852,10 @@ def setup_layer(options, layer, setup_layers):
         for base in layer.__bases__:
             if base is not object:
                 setup_layer(options, base, setup_layers)
-        output.start_set_up(name_from_layer(layer))
-        t = time.time()
+
         if hasattr(layer, 'setUp'):
+            output.start_set_up(name_from_layer(layer))
+            t = time.time()
             try:
                 layer.setUp()
             except MemoryError:
@@ -871,7 +873,7 @@ def setup_layer(options, layer, setup_layers):
                 else:
                     raise
 
-        output.stop_set_up(time.time() - t)
+            output.stop_set_up(time.time() - t)
         setup_layers[layer] = 1
 
 

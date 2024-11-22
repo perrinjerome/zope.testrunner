@@ -427,8 +427,11 @@ def import_name(name):
     return sys.modules[name]
 
 
+_default_layer = zope.testrunner.layer.UnitTests
+
+
 def tests_from_suite(suite, options, dlevel=1,
-                     dlayer=zope.testrunner.layer.UnitTests,
+                     dlayer=_default_layer,
                      accept=None,
                      seen_test_ids=None, duplicated_test_ids=None):
     """Returns a sequence of (test, layer_name)
@@ -452,8 +455,6 @@ def tests_from_suite(suite, options, dlevel=1,
 
     level = getattr(suite, 'level', dlevel)
     layer = getattr(suite, 'layer', dlayer)
-    if not isinstance(layer, str):
-        layer = name_from_layer(layer)
 
     if isinstance(suite, unittest.TestSuite):
         for possible_suite in suite:
@@ -474,10 +475,20 @@ def tests_from_suite(suite, options, dlevel=1,
         if options.only_level is None:
             if options.at_level <= 0 or level <= options.at_level:
                 if accept is None or accept(str(suite)):
+                    # TODO duplicated code
+                    if layer is _default_layer:
+                        layer = _default_layer.from_suite(suite)
+                    if not isinstance(layer, str):
+                        layer = name_from_layer(layer)
                     yield (suite, layer)
         else:
             if level == options.only_level:
                 if accept is None or accept(str(suite)):
+                    # TODO duplicated code
+                    if layer is _default_layer:
+                        layer = _default_layer.from_suite(suite)
+                    if not isinstance(layer, str):
+                        layer = name_from_layer(layer)
                     yield (suite, layer)
 
 
