@@ -176,7 +176,7 @@ class OutputFormatter:
         return "%.3f s" % n_seconds
 
     def summary(self, n_tests, n_failures, n_errors, n_seconds,
-                n_skipped=0):
+                n_skipped=0, n_expected_failures=0, n_unexpected_successes=0):
         """Summarize the results of a single test layer."""
         print("  Ran %s tests with %s failures, %s errors and "
               "%s skipped in %s."
@@ -1047,7 +1047,7 @@ class SubunitOutputFormatter:
         pass
 
     def summary(self, n_tests, n_failures, n_errors, n_seconds,
-                n_skipped=0):
+                n_skipped=0, n_expected_failures=0, n_unexpected_successes=0):
         """Summarize the results of a single test layer.
 
         Since subunit is a stream protocol format, it has no need for a
@@ -1056,7 +1056,7 @@ class SubunitOutputFormatter:
         """
         pass
 
-    def totals(self, n_tests, n_failures, n_errors, n_seconds, n_skipped=0):
+    def totals(self, n_tests, n_failures, n_errors, n_seconds, n_skipped=0, n_expected_failures=0, n_unexpected_successes=0):
         """Summarize the results of all layers.
 
         Simply not supported by the subunit formatter. Fancy summary output
